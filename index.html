@@ -50,6 +50,10 @@
             background: linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%);
         }
 
+        body.page-door {
+            background: linear-gradient(135deg, #8b6f47 0%, #654321 100%);
+        }
+
         body.page-yes {
             background: linear-gradient(135deg, #ffc0cb 0%, #ffb6d9 100%);
         }
@@ -95,6 +99,11 @@
 
         .page-date .container {
             background: rgba(255, 255, 255, 0.95);
+        }
+
+        .page-door .container {
+            background: transparent;
+            padding: 0;
         }
 
         .page-yes .container {
@@ -218,6 +227,24 @@
             100% {
                 opacity: 0.3;
                 transform: scale(1);
+            }
+        }
+
+        @keyframes doorOpen {
+            0% {
+                transform: rotateY(0deg);
+            }
+            100% {
+                transform: rotateY(-90deg);
+            }
+        }
+
+        @keyframes arrowBounce {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            50% {
+                transform: translateX(10px);
             }
         }
 
@@ -435,6 +462,88 @@
             color: #999;
         }
 
+        /* Page Porte */
+        .door-scene {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            position: relative;
+            height: 400px;
+        }
+
+        .door-wrapper {
+            position: relative;
+            perspective: 1000px;
+        }
+
+        .door {
+            width: 150px;
+            height: 300px;
+            background: linear-gradient(135deg, #8b6f47 0%, #654321 100%);
+            border: 3px solid #3d2817;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.6s ease;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .door.opened {
+            animation: doorOpen 0.6s ease forwards;
+        }
+
+        .lock {
+            font-size: 3rem;
+            transition: all 0.3s ease;
+        }
+
+        .door.opened .lock {
+            display: none;
+        }
+
+        .arrow {
+            font-size: 2rem;
+            display: none;
+            animation: arrowBounce 1s ease-in-out infinite;
+            cursor: pointer;
+        }
+
+        .door.opened .arrow {
+            display: block;
+        }
+
+        .key {
+            width: 80px;
+            height: 50px;
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: grab;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            user-select: none;
+            transition: transform 0.2s ease;
+        }
+
+        .key:active {
+            cursor: grabbing;
+        }
+
+        .key.dragging {
+            opacity: 0.8;
+        }
+
+        .key.used {
+            opacity: 0.3;
+            cursor: default;
+        }
+
         /* Cœurs en arrière-plan pour la page YES */
         .hearts-bg {
             position: fixed;
@@ -599,6 +708,21 @@
         </div>
     </div>
 
+    <!-- Page: Door with Key -->
+    <div class="page" id="page-door">
+        <div class="container">
+            <div class="door-scene">
+                <div class="key" id="key" draggable="true">🔑</div>
+                <div class="door-wrapper">
+                    <div class="door" id="door" ondrop="dropKey(event)" ondragover="allowDrop(event)">
+                        <div class="lock">🔒</div>
+                        <div class="arrow" onclick="goToClaire()">➜</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Page: Claire Message -->
     <div class="page" id="page-claire">
         <div class="container">
@@ -637,6 +761,7 @@
     <script>
         let musicPlaying = false;
         let lovePercentage = 0;
+        let keyUsed = false;
 
         function showPage(pageId, bodyClass) {
             // Masquer toutes les pages
@@ -661,6 +786,11 @@
             } else {
                 stopMusic();
             }
+
+            // Réinitialiser la clé si on revient à la page porte
+            if (pageId === 'page-door') {
+                resetDoor();
+            }
         }
 
         function goToRestart() {
@@ -669,6 +799,7 @@
             removeAllBlood();
             lovePercentage = 0;
             updateGaugeDisplay();
+            keyUsed = false;
         }
 
         function goToCopine() {
@@ -702,6 +833,11 @@
         function goToDate() {
             document.getElementById('dateInput').value = '';
             showPage('page-date', 'page-date');
+        }
+
+        function goToDoor() {
+            resetDoor();
+            showPage('page-door', 'page-door');
         }
 
         // Fonction pour augmenter la jauge d'amour
@@ -742,8 +878,8 @@
             const userInput = dateInput.value;
 
             if (userInput === correctDate) {
-                // Bonne réponse, aller à la page suivante
-                goToClaire();
+                // Bonne réponse, aller à la page porte
+                goToDoor();
             } else {
                 // Mauvaise réponse, réinitialiser le champ
                 dateInput.value = '';
@@ -754,8 +890,47 @@
             }
         }
 
-        // Permettre la validation avec Entrée
+        // Drag & Drop pour la clé
+        function allowDrop(event) {
+            event.preventDefault();
+        }
+
+        function dragKey(event) {
+            if (!keyUsed) {
+                event.dataTransfer.effectAllowed = 'move';
+                document.getElementById('key').classList.add('dragging');
+            }
+        }
+
+        function dragEnd(event) {
+            document.getElementById('key').classList.remove('dragging');
+        }
+
+        function dropKey(event) {
+            event.preventDefault();
+            if (!keyUsed) {
+                keyUsed = true;
+                document.getElementById('key').classList.add('used');
+                document.getElementById('door').classList.add('opened');
+            }
+        }
+
+        function resetDoor() {
+            keyUsed = false;
+            const key = document.getElementById('key');
+            const door = document.getElementById('door');
+            key.classList.remove('used', 'dragging');
+            door.classList.remove('opened');
+        }
+
+        // Ajouter les event listeners pour drag
         document.addEventListener('DOMContentLoaded', () => {
+            const key = document.getElementById('key');
+            if (key) {
+                key.addEventListener('dragstart', dragKey);
+                key.addEventListener('dragend', dragEnd);
+            }
+
             const dateInput = document.getElementById('dateInput');
             if (dateInput) {
                 dateInput.addEventListener('keypress', (e) => {
@@ -809,7 +984,7 @@
         // Fonction pour créer les cœurs en arrière-plan
         function createHeartsBg() {
             const container = document.getElementById('hearts-container');
-            container.innerHTML = ''; // Vider le conteneur
+            container.innerHTML = '';
 
             const heartsCount = 5;
             const positions = [
