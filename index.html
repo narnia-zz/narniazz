@@ -239,12 +239,12 @@
             }
         }
 
-        @keyframes arrowBounce {
-            0%, 100% {
-                transform: translateX(0);
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
             }
-            50% {
-                transform: translateX(10px);
+            100% {
+                opacity: 1;
             }
         }
 
@@ -489,7 +489,8 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             transition: transform 0.6s ease;
             transform-style: preserve-3d;
-            cursor: pointer;
+            position: relative;
+            z-index: 20;
         }
 
         .door.opened {
@@ -505,17 +506,6 @@
             display: none;
         }
 
-        .arrow {
-            font-size: 2rem;
-            display: none;
-            animation: arrowBounce 1s ease-in-out infinite;
-            cursor: pointer;
-        }
-
-        .door.opened .arrow {
-            display: block;
-        }
-
         .key {
             width: 80px;
             height: 50px;
@@ -529,6 +519,7 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             user-select: none;
             transition: transform 0.2s ease;
+            z-index: 25;
         }
 
         .key:active {
@@ -542,6 +533,47 @@
         .key.used {
             opacity: 0.3;
             cursor: default;
+        }
+
+        /* Rectangle noir derrière la porte */
+        .door-inside {
+            position: absolute;
+            width: 150px;
+            height: 300px;
+            background: #000;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.6s ease 0.6s;
+            z-index: 15;
+        }
+
+        .door.opened ~ .door-inside {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .door-inside-btn {
+            background: linear-gradient(135deg, #ff1493 0%, #c71585 100%);
+            color: white;
+            padding: 15px 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 20, 147, 0.6);
+            z-index: 30;
+        }
+
+        .door-inside-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 20, 147, 0.8);
+            background: linear-gradient(135deg, #c71585 0%, #a00e6d 100%);
         }
 
         /* Cœurs en arrière-plan pour la page YES */
@@ -716,7 +748,9 @@
                 <div class="door-wrapper">
                     <div class="door" id="door" ondrop="dropKey(event)" ondragover="allowDrop(event)">
                         <div class="lock">🔒</div>
-                        <div class="arrow" onclick="goToClaire()">➜</div>
+                    </div>
+                    <div class="door-inside" id="doorInside">
+                        <button class="door-inside-btn" onclick="goToClaire()">Continuer</button>
                     </div>
                 </div>
             </div>
