@@ -38,6 +38,14 @@
             background: linear-gradient(135deg, #ff69b4 0%, #ffc0cb 100%);
         }
 
+        body.page-love-gauge {
+            background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+        }
+
+        body.page-not-enough {
+            background: linear-gradient(135deg, #87ceeb 0%, #add8e6 100%);
+        }
+
         body.page-yes {
             background: linear-gradient(135deg, #ffc0cb 0%, #ffb6d9 100%);
         }
@@ -70,6 +78,14 @@
         }
 
         .page-claire .container {
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .page-love-gauge .container {
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .page-not-enough .container {
             background: rgba(255, 255, 255, 0.95);
         }
 
@@ -110,6 +126,16 @@
         .page-claire h1 {
             font-size: 2.2rem;
             color: #ff69b4;
+        }
+
+        .page-love-gauge h1 {
+            font-size: 2.5rem;
+            color: #cc0000;
+        }
+
+        .page-not-enough h1 {
+            font-size: 2.5rem;
+            color: #0066cc;
         }
 
         .page-yes h1 {
@@ -263,6 +289,26 @@
             background: linear-gradient(135deg, #ff1493 0%, #c71585 100%);
         }
 
+        .page-love-gauge .btn-choice {
+            background: linear-gradient(135deg, #cc0000 0%, #990000 100%);
+            box-shadow: 0 4px 15px rgba(204, 0, 0, 0.6);
+        }
+
+        .page-love-gauge .btn-choice:hover {
+            box-shadow: 0 6px 20px rgba(204, 0, 0, 0.8);
+            background: linear-gradient(135deg, #990000 0%, #660000 100%);
+        }
+
+        .page-not-enough .btn-choice {
+            background: linear-gradient(135deg, #0099ff 0%, #0066cc 100%);
+            box-shadow: 0 4px 15px rgba(0, 102, 204, 0.6);
+        }
+
+        .page-not-enough .btn-choice:hover {
+            box-shadow: 0 6px 20px rgba(0, 102, 204, 0.8);
+            background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+        }
+
         .page-yes .btn-choice {
             background: linear-gradient(135deg, #ff1493 0%, #c71585 100%);
             box-shadow: 0 4px 15px rgba(255, 20, 147, 0.6);
@@ -295,6 +341,41 @@
 
         .page.active {
             display: block;
+        }
+
+        /* Jauge d'amour */
+        .gauge-container {
+            margin: 40px 0;
+            width: 100%;
+        }
+
+        .gauge-bar {
+            width: 100%;
+            height: 40px;
+            background: #ddd;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px;
+        }
+
+        .gauge-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff4444 0%, #ff8888 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .gauge-percentage {
+            font-size: 1.2rem;
+            color: #333;
+            font-weight: bold;
         }
 
         /* Cœurs en arrière-plan pour la page YES */
@@ -400,7 +481,7 @@
         <div class="container">
             <h1>Qui est ta copine ?</h1>
             <div class="buttons">
-                <button class="btn-choice" onclick="goToClaire()">Claire</button>
+                <button class="btn-choice" onclick="goToLoveGauge()">Claire</button>
                 <button class="btn-choice" onclick="goToJulie()">Julie</button>
             </div>
         </div>
@@ -413,6 +494,32 @@
             <h1>Julie n'existe pas... 🩸</h1>
             <div class="buttons">
                 <button class="btn-choice" onclick="goToRestart()">On recommence</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page: Love Gauge -->
+    <div class="page" id="page-love-gauge">
+        <div class="container">
+            <h1>Combien tu l'aime? ❤️</h1>
+            <div class="gauge-container">
+                <div class="gauge-bar">
+                    <div class="gauge-fill" id="gaugeFill"></div>
+                </div>
+                <div class="gauge-percentage" id="gaugePercentage">0%</div>
+            </div>
+            <div class="buttons">
+                <button class="btn-choice" onclick="increaseGauge()">+</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page: Not Enough Love -->
+    <div class="page" id="page-not-enough">
+        <div class="container">
+            <h1>C'est tout...?</h1>
+            <div class="buttons">
+                <button class="btn-choice" onclick="goToRestart()">Oust</button>
             </div>
         </div>
     </div>
@@ -454,6 +561,7 @@
 
     <script>
         let musicPlaying = false;
+        let lovePercentage = 0;
 
         function showPage(pageId, bodyClass) {
             // Masquer toutes les pages
@@ -484,12 +592,20 @@
             showPage('page-restart', 'page-restart');
             removeAllConfetti();
             removeAllBlood();
+            lovePercentage = 0;
+            updateGaugeDisplay();
         }
 
         function goToCopine() {
             showPage('page-copine', 'page-copine');
             removeAllConfetti();
             removeAllBlood();
+        }
+
+        function goToLoveGauge() {
+            lovePercentage = 0;
+            updateGaugeDisplay();
+            showPage('page-love-gauge', 'page-love-gauge');
         }
 
         function goToClaire() {
@@ -506,6 +622,37 @@
 
         function goToNo() {
             showPage('page-no', 'page-no');
+        }
+
+        // Fonction pour augmenter la jauge d'amour
+        function increaseGauge() {
+            if (lovePercentage < 100) {
+                lovePercentage += 10;
+                if (lovePercentage > 100) {
+                    lovePercentage = 100;
+                }
+                updateGaugeDisplay();
+
+                // Si on atteint 100%, aller à la page suivante
+                if (lovePercentage === 100) {
+                    setTimeout(() => {
+                        showPage('page-claire', 'page-claire');
+                    }, 500);
+                }
+            }
+        }
+
+        // Fonction pour mettre à jour l'affichage de la jauge
+        function updateGaugeDisplay() {
+            document.getElementById('gaugeFill').style.width = lovePercentage + '%';
+            document.getElementById('gaugePercentage').textContent = lovePercentage + '%';
+
+            // Mettre à jour le texte dans la jauge si elle n'est pas vide
+            if (lovePercentage > 0) {
+                document.getElementById('gaugeFill').textContent = lovePercentage + '%';
+            } else {
+                document.getElementById('gaugeFill').textContent = '';
+            }
         }
 
         // Fonction pour créer les taches de sang
