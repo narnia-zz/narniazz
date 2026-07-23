@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qui est ta copine ?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.page-restart {
+            background: linear-gradient(135deg, #ffd6e8 0%, #ffe0ef 100%);
+        }
+
+        body.page-copine {
+            background: linear-gradient(135deg, #ffeb3b 0%, #fdd835 100%);
+        }
+
+        body.page-julie {
+            background: #0a0a0a;
+        }
+
+        body.page-claire {
+            background: linear-gradient(135deg, #ff69b4 0%, #ffc0cb 100%);
+        }
+
+        body.page-yes {
+            background: linear-gradient(135deg, #ffc0cb 0%, #ffb6d9 100%);
+        }
+
+        body.page-no {
+            background: linear-gradient(135deg, #4a148c 0%, #6a1b9a 100%);
+        }
+
+        .container {
+            text-align: center;
+            z-index: 10;
+            padding: 60px 40px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+            position: relative;
+        }
+
+        .page-restart .container {
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .page-copine .container {
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .page-julie .container {
+            background: rgba(0, 0, 0, 0.85);
+            border: 3px solid #8b0000;
+        }
+
+        .page-claire .container {
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .page-yes .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .page-no .container {
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        h1 {
+            margin-bottom: 50px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .page-restart h1 {
+            font-size: 2.5rem;
+            color: #ff69b4;
+        }
+
+        .page-copine h1 {
+            font-size: 2.5rem;
+            color: #333;
+        }
+
+        .page-julie h1 {
+            font-size: 2.5rem;
+            color: #cc0000;
+            text-shadow: 0 0 20px rgba(204, 0, 0, 0.8);
+            font-style: italic;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .page-claire h1 {
+            font-size: 2.2rem;
+            color: #ff69b4;
+        }
+
+        .page-yes h1 {
+            font-size: 3rem;
+            color: #ff1493;
+            text-shadow: 0 0 20px rgba(255, 20, 147, 0.5);
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        .page-no h1 {
+            font-size: 2.2rem;
+            color: #ffffff;
+        }
+
+        .emoji-heart {
+            font-size: 2rem;
+            margin: 0 8px;
+            display: inline-block;
+            animation: heartbeat 1.2s ease-in-out infinite;
+        }
+
+        .emoji-heart:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .emoji-heart:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-10vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes blood-drop {
+            0% {
+                opacity: 0.2;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 0.5;
+            }
+            100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            z-index: 5;
+            font-size: 1.5rem;
+        }
+
+        .blood-drop {
+            position: fixed;
+            pointer-events: none;
+            z-index: 2;
+            opacity: 0.3;
+            animation: blood-drop 3s ease-in-out infinite;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-choice {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+            min-width: 150px;
+        }
+
+        .btn-choice:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 152, 0, 0.6);
+            background: linear-gradient(135deg, #f57c00 0%, #e65100 100%);
+        }
+
+        .page-restart .btn-choice {
+            background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.4);
+        }
+
+        .page-restart .btn-choice:hover {
+            box-shadow: 0 6px 20px rgba(255, 105, 180, 0.6);
+            background: linear-gradient(135deg, #ff1493 0%, #c71585 100%);
+        }
+
+        .page-julie .btn-choice {
+            background: linear-gradient(135deg, #8b0000 0%, #660000 100%);
+            box-shadow: 0 4px 15px rgba(139, 0, 0, 0.6);
+            color: white;
+            border: 2px solid #cc0000;
+        }
+
+        .page-julie .btn-choice:hover {
+            box-shadow: 0 6px 20px rgba(204, 0, 0, 0.8);
+            background: linear-gradient(135deg, #660000 0%, #440000 100%);
+        }
+
+        .page-claire .btn-choice {
+            background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.4);
+        }
+
+        .page-claire .btn-choice:hover {
+            box-shadow: 0 6px 20px rgba(255, 105, 180, 0.6);
+            background: linear-gradient(135deg, #ff1493 0%, #c71585 100%);
+        }
+
+        .page-yes .btn-choice {
+            background: linear-gradient(135deg, #ff1493 0%, #c71585 100%);
+            box-shadow: 0 4px 15px rgba(255, 20, 147, 0.6);
+            color: white;
+        }
+
+        .page-yes .btn-choice:hover {
+            box-shadow: 0 6px 20px rgba(255, 20, 147, 0.8);
+            background: linear-gradient(135deg, #c71585 0%, #a00e6d 100%);
+        }
+
+        .page-no .btn-choice {
+            background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);
+            box-shadow: 0 4px 15px rgba(156, 39, 176, 0.4);
+        }
+
+        .page-no .btn-choice:hover {
+            box-shadow: 0 6px 20px rgba(156, 39, 176, 0.6);
+            background: linear-gradient(135deg, #7b1fa2 0%, #4a148c 100%);
+        }
+
+        button:active {
+            transform: translateY(-1px);
+        }
+
+        /* Page cachée */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Cœurs en arrière-plan pour la page YES */
+        .hearts-bg {
+            position: fixed;
+            font-size: 3rem;
+            opacity: 0.3;
+            pointer-events: none;
+            animation: float 6s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        .hearts-bg:nth-child(1) {
+            top: 10%;
+            left: 5%;
+            animation-delay: 0s;
+        }
+
+        .hearts-bg:nth-child(2) {
+            top: 50%;
+            right: 10%;
+            animation-delay: 1s;
+        }
+
+        .hearts-bg:nth-child(3) {
+            top: 70%;
+            left: 20%;
+            animation-delay: 2s;
+        }
+
+        .hearts-bg:nth-child(4) {
+            top: 30%;
+            right: 25%;
+            animation-delay: 1.5s;
+        }
+
+        .hearts-bg:nth-child(5) {
+            bottom: 15%;
+            left: 50%;
+            animation-delay: 2.5s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .page-yes .hearts-bg {
+            opacity: 0.4;
+        }
+
+        /* Contrôle audio */
+        .audio-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            background: rgba(255, 105, 180, 0.9);
+            padding: 12px 18px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(255, 20, 147, 0.4);
+            cursor: pointer;
+            font-size: 1.3rem;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .audio-control:hover {
+            background: rgba(255, 20, 147, 1);
+            transform: scale(1.15);
+            box-shadow: 0 6px 20px rgba(255, 20, 147, 0.6);
+        }
+    </style>
+</head>
+<body class="page-restart">
+    <!-- Audio romantique -->
+    <audio id="musicYes" loop volume="0.6">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2706/2706-preview.mp3" type="audio/mpeg">
+        Votre navigateur ne supporte pas l'élément audio.
+    </audio>
+
+    <!-- Page: Restart -->
+    <div class="page active" id="page-restart">
+        <div class="container">
+            <h1>
+                On recommence
+                Ready?
+                <span class="emoji-heart">❤️</span>
+                <span class="emoji-heart">💕</span>
+                <span class="emoji-heart">❤️</span>
+            </h1>
+            <div class="buttons">
+                <button class="btn-choice" onclick="goToCopine()">Prêt</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page: Qui est ta copine ? -->
+    <div class="page" id="page-copine">
+        <div class="container">
+            <h1>Qui est ta copine ?</h1>
+            <div class="buttons">
+                <button class="btn-choice" onclick="goToClaire()">Claire</button>
+                <button class="btn-choice" onclick="goToJulie()">Julie</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page: Julie (Dark/Scary) -->
+    <div class="page" id="page-julie">
+        <div id="blood-container"></div>
+        <div class="container">
+            <h1>Julie n'existe pas... 🩸</h1>
+            <div class="buttons">
+                <button class="btn-choice" onclick="goToRestart()">On recommence</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page: Claire Message -->
+    <div class="page" id="page-claire">
+        <div class="container">
+            <h1>Veut-elle te dire quelque chose?</h1>
+            <div class="buttons">
+                <button class="btn-choice" onclick="goToYes()">Oui</button>
+                <button class="btn-choice" onclick="goToNo()">Non</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page: Oui (Confession d'amour) -->
+    <div class="page" id="page-yes">
+        <div id="hearts-container"></div>
+        <div class="container">
+            <h1>Je t'aime mon amour ❤️</h1>
+            <div class="buttons">
+                <button class="btn-choice" onclick="goToRestart()">Retour</button>
+            </div>
+        </div>
+        <div class="audio-control" onclick="toggleMusic()" title="Cliquez pour activer/désactiver la musique">
+            🎵
+        </div>
+    </div>
+
+    <!-- Page: Non -->
+    <div class="page" id="page-no">
+        <div class="container">
+            <h1>Pourquoi tu es la alors?</h1>
+            <div class="buttons">
+                <button class="btn-choice" onclick="goToRestart()">Retour</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let musicPlaying = false;
+
+        function showPage(pageId, bodyClass) {
+            // Masquer toutes les pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+
+            // Afficher la page demandée
+            document.getElementById(pageId).classList.add('active');
+
+            // Changer la classe du body
+            document.body.className = bodyClass;
+
+            // Si c'est la page YES, lancer les confetti, ajouter les cœurs et la musique
+            if (pageId === 'page-yes') {
+                createConfetti();
+                createHeartsBg();
+                playMusic();
+            } else if (pageId === 'page-julie') {
+                createBloodDrops();
+                stopMusic();
+            } else {
+                stopMusic();
+            }
+        }
+
+        function goToRestart() {
+            showPage('page-restart', 'page-restart');
+            removeAllConfetti();
+            removeAllBlood();
+        }
+
+        function goToCopine() {
+            showPage('page-copine', 'page-copine');
+            removeAllConfetti();
+            removeAllBlood();
+        }
+
+        function goToClaire() {
+            showPage('page-claire', 'page-claire');
+        }
+
+        function goToJulie() {
+            showPage('page-julie', 'page-julie');
+        }
+
+        function goToYes() {
+            showPage('page-yes', 'page-yes');
+        }
+
+        function goToNo() {
+            showPage('page-no', 'page-no');
+        }
+
+        // Fonction pour créer les taches de sang
+        function createBloodDrops() {
+            const container = document.getElementById('blood-container');
+            container.innerHTML = '';
+
+            const bloodCount = 30;
+            for (let i = 0; i < bloodCount; i++) {
+                const blood = document.createElement('div');
+                blood.classList.add('blood-drop');
+                blood.textContent = '🩸';
+                blood.style.fontSize = (Math.random() * 2 + 1) + 'rem';
+                blood.style.left = Math.random() * 100 + '%';
+                blood.style.top = Math.random() * 100 + '%';
+                blood.style.animationDelay = Math.random() * 2 + 's';
+                blood.style.animationDuration = (2 + Math.random() * 2) + 's';
+                container.appendChild(blood);
+            }
+        }
+
+        // Fonction pour créer les confetti
+        function createConfetti() {
+            const confettiCount = 100;
+            const confettiTypes = ['❤️', '💕', '💖', '💗', '💓'];
+
+            for (let i = 0; i < confettiCount; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.classList.add('confetti');
+                    confetti.textContent = confettiTypes[Math.floor(Math.random() * confettiTypes.length)];
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.animationDuration = (3 + Math.random() * 2) + 's';
+                    confetti.style.animation = `confetti-fall ${3 + Math.random() * 2}s linear forwards`;
+                    document.body.appendChild(confetti);
+
+                    // Supprimer le confetti après l'animation
+                    setTimeout(() => confetti.remove(), 5000);
+                }, i * 30);
+            }
+        }
+
+        // Fonction pour créer les cœurs en arrière-plan
+        function createHeartsBg() {
+            const container = document.getElementById('hearts-container');
+            container.innerHTML = ''; // Vider le conteneur
+
+            const heartsCount = 5;
+            const positions = [
+                { top: '10%', left: '5%' },
+                { top: '50%', right: '10%' },
+                { top: '70%', left: '20%' },
+                { top: '30%', right: '25%' },
+                { bottom: '15%', left: '50%' }
+            ];
+
+            for (let i = 0; i < heartsCount; i++) {
+                const heart = document.createElement('div');
+                heart.classList.add('hearts-bg');
+                heart.textContent = '❤️';
+                heart.style.animationDelay = (i * 0.5) + 's';
+
+                const pos = positions[i];
+                if (pos.top) heart.style.top = pos.top;
+                if (pos.bottom) heart.style.bottom = pos.bottom;
+                if (pos.left) heart.style.left = pos.left;
+                if (pos.right) heart.style.right = pos.right;
+
+                container.appendChild(heart);
+            }
+        }
+
+        // Fonction pour supprimer tous les confetti
+        function removeAllConfetti() {
+            document.querySelectorAll('.confetti').forEach(c => c.remove());
+            document.getElementById('hearts-container').innerHTML = '';
+        }
+
+        // Fonction pour supprimer tout le sang
+        function removeAllBlood() {
+            document.getElementById('blood-container').innerHTML = '';
+        }
+
+        // Fonction pour jouer la musique
+        function playMusic() {
+            const audio = document.getElementById('musicYes');
+            audio.play().catch(err => console.log('Autoplay bloqué, musique non lancée'));
+            musicPlaying = true;
+        }
+
+        // Fonction pour arrêter la musique
+        function stopMusic() {
+            const audio = document.getElementById('musicYes');
+            audio.pause();
+            audio.currentTime = 0;
+            musicPlaying = false;
+        }
+
+        // Fonction pour activer/désactiver la musique
+        function toggleMusic() {
+            const audio = document.getElementById('musicYes');
+            if (musicPlaying) {
+                audio.pause();
+                musicPlaying = false;
+            } else {
+                audio.play();
+                musicPlaying = true;
+            }
+        }
+
+        // Redirection depuis la page d'accueil
+        function startJourney() {
+            goToRestart();
+        }
+    </script>
+</body>
+</html>
